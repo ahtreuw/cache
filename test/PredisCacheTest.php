@@ -3,6 +3,7 @@
 namespace Cache;
 
 use Clock\ClockException;
+use Clock\ClockExceptionInterface;
 use Clock\ClockInterface;
 use DateInterval;
 use PHPUnit\Framework\MockObject\Exception;
@@ -191,6 +192,9 @@ class PredisCacheTest extends TestCase
         $cache->set('key', 'value');
     }
 
+    /**
+     * @throws CacheException
+     */
     public function testInvalidArgumentException(): void
     {
         $this->client->expects($this->never())->method('executeCommand');
@@ -214,7 +218,7 @@ class PredisCacheTest extends TestCase
 
         $cache = new PredisCache(parameters: $this->client, clock: $clock);
 
-        self::expectException(\Cache\CacheException::class);
+        self::expectException(CacheException::class);
         self::expectExceptionMessage('My clock exception message');
 
         $clock->expects($this->once())->method('with')->willReturnCallback(function () {
@@ -280,7 +284,7 @@ class PredisCacheTest extends TestCase
 
 
     /**
-     * @throws CacheException
+     * @throws CacheException|ClockExceptionInterface
      */
     public function testGetMultiple(): void
     {
@@ -297,7 +301,7 @@ class PredisCacheTest extends TestCase
     }
 
     /**
-     * @throws CacheException
+     * @throws CacheException|ClockExceptionInterface
      */
     public function testGetMultipleDefaultAssoc(): void
     {
@@ -314,7 +318,7 @@ class PredisCacheTest extends TestCase
     }
 
     /**
-     * @throws CacheException
+     * @throws CacheException|ClockExceptionInterface
      */
     public function testGetMultipleDefault(): void
     {
