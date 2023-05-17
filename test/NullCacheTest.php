@@ -26,7 +26,7 @@ class NullCacheTest extends TestCase
         self::assertFalse($simpleCache->deleteMultiple(['key']));
 
         self::assertFalse($simpleCache->set('key', 'value'));
-        self::assertFalse($simpleCache->setMultiple(['key', 'value']));
+        self::assertFalse($simpleCache->setMultiple(['key' => 'value']));
 
         self::assertFalse($simpleCache->clear());
     }

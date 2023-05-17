@@ -24,6 +24,7 @@ trait SimpleCacheTrait
 
     /**
      * @throws \Psr\SimpleCache\CacheException
+     * @throws ClockExceptionInterface
      */
     public function setMultiple(iterable $values, DateInterval|int|null $ttl = null): bool
     {

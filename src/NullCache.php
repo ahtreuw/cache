@@ -8,6 +8,8 @@ use Psr\SimpleCache\CacheInterface;
 
 class NullCache implements CacheInterface
 {
+    use SimpleCacheTrait;
+
     public function __construct(
         private bool $returnOnSet = false,
         private bool $returnOnDelete = false,
@@ -40,25 +42,5 @@ class NullCache implements CacheInterface
     public function has(string $key): bool
     {
         return $this->returnOnHas;
-    }
-
-    #[Pure] public function getMultiple(iterable $keys, mixed $default = null): iterable
-    {
-        $return = [];
-        foreach ($keys as $key) {
-            $defaultValue = is_array($default) && array_key_exists($key, $default) ? $default[$key] : $default;
-            $return[$key] = $this->get($key, $defaultValue);
-        }
-        return $return;
-    }
-
-    public function setMultiple(iterable $values, DateInterval|int|null $ttl = null): bool
-    {
-        return $this->returnOnSet;
-    }
-
-    public function deleteMultiple(iterable $keys): bool
-    {
-        return $this->returnOnDelete;
     }
 }

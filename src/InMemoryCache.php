@@ -4,9 +4,9 @@ namespace Cache;
 
 use Clock\Clock;
 use Clock\ClockExceptionInterface;
+use Clock\ClockInterface;
 use DateInterval;
 use JetBrains\PhpStorm\ArrayShape;
-use Psr\Clock\ClockInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\SimpleCache\InvalidArgumentException;
 
@@ -29,13 +29,17 @@ class InMemoryCache implements CacheInterface
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        if (array_key_exists($key = $this->prepareKey($key), $this->values) === false) {
+        $key = $this->prepareKey($key);
+
+        if (array_key_exists($key, $this->values) === false) {
             return $default;
         }
+
         if ($this->isExpired($this->values[$key]['exp'])) {
             $this->delete($key);
             return null;
         }
+
         return $this->values[$key]['val'];
     }
 
@@ -48,9 +52,12 @@ class InMemoryCache implements CacheInterface
         $key = $this->prepareKey($key);
         $ttl = $this->prepareTTL($ttl);
 
+        if (is_null($ttl) === false) {
+            $ttl = $this->clock->now()->getTimestamp() + $ttl;
+        }
+
         if ($this->isExpired($ttl)) {
-            $this->delete($key);
-            return true;
+            return $this->delete($key);
         }
 
         $this->values[$key] = ['val' => $value, 'exp' => $ttl];
@@ -59,20 +66,39 @@ class InMemoryCache implements CacheInterface
 
     public function delete(string $key): bool
     {
-        if (array_key_exists($key = $this->prepareKey($key), $this->values)) {
+        $key = $this->prepareKey($key);
+
+        if (array_key_exists($key, $this->values)) {
             unset($this->values[$key]);
         }
+
         return true;
     }
 
     public function clear(): bool
     {
         $this->values = [];
+        return true;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws ClockExceptionInterface
+     */
     public function has(string $key): bool
     {
-        return array_key_exists($this->prepareKey($key), $this->values);
+        $key = $this->prepareKey($key);
+
+        if (array_key_exists($key, $this->values) === false) {
+            return false;
+        }
+
+        if ($this->isExpired($this->values[$key]['exp'])) {
+            $this->delete($key);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -83,6 +109,6 @@ class InMemoryCache implements CacheInterface
         if (is_null($expire)) {
             return false;
         }
-        return $this->clock->now()->getTimestamp() <= $expire;
+        return $expire < $this->clock->now()->getTimestamp();
     }
 }
