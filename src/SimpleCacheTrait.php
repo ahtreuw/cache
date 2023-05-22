@@ -8,6 +8,7 @@ use DateInterval;
 trait SimpleCacheTrait
 {
     protected DateInterval|int|null $defaultTtl = null;
+    protected string $prefix = '';
 
     /**
      * @throws \Psr\SimpleCache\CacheException|ClockExceptionInterface

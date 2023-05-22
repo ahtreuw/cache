@@ -27,11 +27,12 @@ class PredisCache implements CacheInterface
         mixed                    $parameters = null,
         mixed                    $options = null,
         DateInterval|int|null    $defaultTtl = null,
-        protected string         $prefix = '',
+        string                   $prefix = '',
         protected ClockInterface $clock = new Clock
     )
     {
         $this->client = $parameters instanceof ClientInterface ? $parameters : new Client($parameters, $options);
+        $this->prefix = $prefix;
         $this->defaultTtl = $defaultTtl;
     }
 
